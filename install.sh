@@ -145,6 +145,36 @@ copy_files() {
     fi
 }
 
+# OpenCode reads an agent file as V2 only when it carries a V2 field
+# (permissions / request / system / disabled). The shared agent files use the
+# V1 `tools:` mapping, so without an explicit `mode:` they land as primary
+# agents and cannot be launched through the subagent tool. Inject it at
+# install time instead of forking the source files per harness.
+install_opencode_agents() {
+    local dest_dir="$1"
+    local item name copied=0
+
+    mkdir -p "$dest_dir"
+    for item in "$AGENTS_SRC"/*.md; do
+        [ -f "$item" ] || continue
+        name=$(basename "$item")
+        # README.md documents the agent set; it is not an agent.
+        [ "$name" = "README.md" ] && continue
+        if grep -q '^mode:' "$item"; then
+            cp "$item" "$dest_dir/$name"
+        else
+            awk 'NR==1 && $0=="---" { print; print "mode: subagent"; next } { print }' \
+                "$item" > "$dest_dir/$name"
+        fi
+        echo "✓ Installed agent: $name"
+        copied=$((copied + 1))
+    done
+    if [ "$copied" -eq 0 ]; then
+        echo "[!] No agent found in '$AGENTS_SRC' (cwd: $PWD)" >&2
+        return 1
+    fi
+}
+
 install_claude() {
     local root
     if [ "$SCOPE" = "project" ]; then
@@ -208,7 +238,7 @@ install_opencode() {
     echo "Installing Claude Bug Bounty for OpenCode ($SCOPE)..."
     copy_tree_items "skills/*" "$root/skills" "skill"
     copy_files "commands/*.md" "$root/commands" "command"
-    copy_files "$AGENTS_SRC/*.md" "$root/agents" "agent"
+    install_opencode_agents "$root/agents"
     echo "Done: $root"
     echo ""
     echo "OpenCode also reads AGENTS.md from the project root. Keep this repo's AGENTS.md committed for portable project instructions."

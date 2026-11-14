@@ -22,13 +22,47 @@ You also need [OpenCode](https://opencode.ai) installed.
 git clone https://github.com/Awarexone/Agentic-Bug-Hunter.git
 cd Agentic-Bug-Hunter
 chmod +x install_tools.sh && ./install_tools.sh   # scanning tools
-chmod +x install.sh && ./install.sh --opencode    # skills + commands
+chmod +x install.sh && ./install.sh --agent opencode --project   # skills + commands + agents
 ```
 
 The installer will:
-1. Symlink domain skills to `.opencode/skills/`
+1. Copy domain skills to `.opencode/skills/`
 2. Copy commands to `.opencode/commands/`
-3. Optionally write MCP server config to `opencode.json`
+3. Copy agents to `.opencode/agents/`, injecting `mode: subagent` so OpenCode
+   can launch them through the subagent tool
+
+Use `--project` to install into the repo (paths in the commands are
+repo-relative). Drop `--project` to install into `~/.config/opencode` instead.
+
+### MCP server (optional)
+
+The MCP server exposes the hunt engine as tools (`bughunter_recon`,
+`bughunter_hunt`, `bughunter_get_scope`, …). It needs the `mcp` SDK:
+
+```bash
+uv tool install --editable .    # provides the `bughunter` command + the SDK
+bughunter mcp doctor            # verify
+```
+
+Then register it — OpenCode v2 nests servers under `mcp.servers`:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "bughunter": {
+        "type": "local",
+        "command": ["bughunter", "mcp", "serve"],
+        "environment": { "BBHUNT_MCP_APPROVE": "0" }
+      }
+    }
+  }
+}
+```
+
+Put it in `.opencode/opencode.json` (project) or `~/.config/opencode/opencode.json`
+(global). Verify with `opencode mcp list`.
 
 ### Verify Installation
 

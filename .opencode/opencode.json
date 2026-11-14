@@ -1,0 +1,12 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "bughunter": {
+        "type": "local",
+        "command": ["bughunter", "mcp", "serve"],
+        "environment": { "BBHUNT_MCP_APPROVE": "0" }
+      }
+    }
+  }
+}

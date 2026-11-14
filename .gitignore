@@ -16,6 +16,12 @@ api_keys.txt
 # Nested local clones / sub-repos (not tracked)
 Agentic-Bug-Hunter/
 
+# Local OpenCode install artifacts — regenerate with:
+#   ./install.sh --agent opencode --project
+.opencode/skills/
+.opencode/commands/
+.opencode/agents/
+
 # Local control sockets (short paths for AF_UNIX)
 .ctl/
 

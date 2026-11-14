@@ -1,6 +1,8 @@
 # Commands
 
-33 slash commands installed into `~/.claude/commands/` by `install.sh`.
+Slash commands installed by `install.sh` — `~/.claude/commands/` (Claude Code),
+`~/.config/opencode/commands/` or `.opencode/commands/` (OpenCode),
+`~/.pi/agent/prompts/` (Pi), `~/.codex/commands/` (Codex).
 
 ## Core Workflow
 | Command | What It Does |

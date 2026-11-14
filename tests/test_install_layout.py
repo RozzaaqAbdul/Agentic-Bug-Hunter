@@ -65,10 +65,27 @@ def test_agents_install_when_run_from_unrelated_cwd(tmp_path):
     proc = run_install(["--agent", "opencode"], cwd=tmp_path, env={"OPENCODE_CONFIG_DIR": str(cfg)})
 
     assert proc.returncode == 0, proc.stderr
-    expected = sorted(p.name for p in AGENTS_SRC.glob("*.md"))
+    expected = sorted(p.name for p in AGENTS_SRC.glob("*.md") if p.name != "README.md")
     assert expected, "no agent .md files found in the source tree"
     installed = sorted(p.name for p in (cfg / "agents").glob("*.md"))
     assert installed == expected, f"agents mismatch: {installed} != {expected}"
+
+
+def test_installed_agents_are_subagents(tmp_path):
+    """OpenCode needs `mode: subagent` to launch an agent via the subagent tool.
+
+    The shared agent files carry V1 frontmatter, which OpenCode reads as a
+    primary agent — it then refuses to launch them. The installer injects the
+    field instead of forking the source files per harness.
+    """
+    cfg = tmp_path / "cfg"
+    proc = run_install(["--agent", "opencode"], cwd=tmp_path, env={"OPENCODE_CONFIG_DIR": str(cfg)})
+
+    assert proc.returncode == 0, proc.stderr
+    agents = sorted((cfg / "agents").glob("*.md"))
+    assert agents
+    for path in agents:
+        assert "mode: subagent" in path.read_text(encoding="utf-8"), f"{path.name} is not a subagent"
 
 
 def test_skills_and_commands_install_from_unrelated_cwd(tmp_path):
@@ -90,7 +107,7 @@ def test_install_is_idempotent(tmp_path):
 
     assert first.returncode == 0, first.stderr
     assert second.returncode == 0, second.stderr
-    expected = sorted(p.name for p in AGENTS_SRC.glob("*.md"))
+    expected = sorted(p.name for p in AGENTS_SRC.glob("*.md") if p.name != "README.md")
     assert sorted(p.name for p in (cfg / "agents").glob("*.md")) == expected
 
 

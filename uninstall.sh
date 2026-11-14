@@ -9,6 +9,15 @@ ASSUME_YES="no"
 PURGE_CONFIG="no"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# agents/ lives under bughunter/ in this layout. Resolve it the same way
+# install.sh does, otherwise the agent files are never matched and stay
+# installed after an uninstall.
+if [ -d "$SCRIPT_DIR/bughunter/agents" ]; then
+    AGENTS_SRC="$SCRIPT_DIR/bughunter/agents"
+else
+    AGENTS_SRC="$SCRIPT_DIR/agents"
+fi
+
 usage() {
     cat <<'EOF'
 Usage: ./uninstall.sh [--agent claude|opencode|pi|codex|agents|standalone|all] [--global|--project] [options]
@@ -129,7 +138,7 @@ uninstall_claude() {
     fi
     remove_tree_items "$SCRIPT_DIR/skills/*" "$root/skills" "Claude skill"
     remove_files "$SCRIPT_DIR/commands/*.md" "$root/commands" "Claude command"
-    remove_files "$SCRIPT_DIR/agents/*.md" "$root/agents" "Claude agent"
+    remove_files "$AGENTS_SRC/*.md" "$root/agents" "Claude agent"
 }
 
 uninstall_opencode() {
@@ -141,7 +150,7 @@ uninstall_opencode() {
     fi
     remove_tree_items "$SCRIPT_DIR/skills/*" "$root/skills" "OpenCode skill"
     remove_files "$SCRIPT_DIR/commands/*.md" "$root/commands" "OpenCode command"
-    remove_files "$SCRIPT_DIR/agents/*.md" "$root/agents" "OpenCode agent"
+    remove_files "$AGENTS_SRC/*.md" "$root/agents" "OpenCode agent"
 }
 
 uninstall_pi() {
