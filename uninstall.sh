@@ -182,7 +182,7 @@ uninstall_antigravity() {
     fi
     remove_tree_items "$SCRIPT_DIR/skills/*" "$root/skills" "Antigravity skill"
     remove_files "$SCRIPT_DIR/commands/*.md" "$root/commands" "Antigravity command"
-    remove_files "$SCRIPT_DIR/bughunter/agents/*.md" "$root/agents" "Antigravity agent"
+    remove_files "$AGENTS_SRC/*.md" "$root/agents" "Antigravity agent"
     remove_path "$root/rules/hunting.md" "Antigravity rule"
     remove_path "$root/rules/reporting.md" "Antigravity rule"
 }
